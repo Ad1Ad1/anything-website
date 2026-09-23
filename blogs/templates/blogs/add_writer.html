@@ -1,0 +1,46 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/<a class="text-decoration-none" href="{% url "blogs:blog" blog.id %}">{{ blog.name }}</a>/<a class="text-decoration-none" href="{% url "blogs:blog_settings" blog.id %}">Settings</a>/Writers/new</h4>
+<h3>Adding a new writer</h3>
+{% endblock page_header %}
+{% block content %}
+<form action="{% url "blogs:search_writers" blog.id %}" method='get' class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button name="submit" class="btn btn-outline-primary">Search</button>
+</form>
+
+<div class="card mb-3 mt-3" style="background-color: rgba(140, 140, 255, 0.15);">
+    <div class="card-header">
+        <h4>Search results:</h4>
+    </div>
+    <div class="card-body">
+        {% for user in results %}
+        <div class="row align-items-start">
+            <div class="col">
+                {% if user.profile.pic %}
+                <img src="{{ user.profile.pic.url }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                {% else %}
+                <img src="{% static 'default_picture.jpg' %}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                {% endif %}
+                <a class="text-decoration-none fw-light" href="{% url "users:profile" user 'infobio' %}">{{ user }}</a>
+            </div>
+            <div class="col-auto mb-3">
+                {% if user in writers_users %}
+                <h4>Writer</h4>
+                {% elif user == blog.owner %}
+                <h4>Owner</h4>
+                {% else %}
+                <form method="POST" action="{% url "blogs:add_writer" blog.id user.id %}" class="form mt-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success" name="add_writer">Select</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

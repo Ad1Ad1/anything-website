@@ -1,0 +1,59 @@
+{% extends "blogs/base.html" %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Blogs/{{ blog }}/</h4>
+<h3>Blog: {{ blog }} {% if blog.owner == user %}<a class="fw-light text-decoration-none" href="{% url "blogs:edit_blog" blog.id %}">edit</a>{% endif %}</h3>
+{% if blog.owner != user %}
+<div class="d-inline-flex align-items-center flex-wrap gap-2 rounded">
+    {% if not blog.user_subscribed %}
+    <form method="POST" action="{% url "blogs:subscribe" "blog" blog.id "True" %}" class="form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-secondary" name="subscribe">Subscribe</button>
+    </form>
+    {% else %}
+    <h4 class="mb-0">Subscribed</h4>
+    <form method="POST" action="{% url "blogs:subscribe" "blog" blog.id "True" %}" class="form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-secondary" name="subscribe">Unsubscribe</button>
+    </form>
+    {% endif %}
+</div>
+{% endif %}
+{% if blog.owner == user %}<h3><a class="fw-light text-decoration-none" href="{% url "blogs:blog_settings" blog.id %}">Settings</a></h3>{% endif %}
+<div>
+<a href="{% url "blogs:subscribers" "blog" blog.id %}" class="text-decoration-none">View subscribers</a>
+</div>
+{% endblock page_header %}
+{% block content %}
+<h4>Topics(sorted by relevance):</h4>
+{% for r in relations %}
+<div class="card mb-3" style="background-color: rgba(140, 140, 255, 0.15);">
+    <div class="card-header">
+        <h4>{{ r.topic.name }} - {{ r.percentage }}%</h5>
+    </div>
+</div>
+{% endfor %}
+<h4>Posts:</h4>
+{% if blog.owner == user or user in writers %}<h3 class="fw-light"><a href="{% url "blogs:new_post" blog.id 0 "False" %}" up-layer="new">Add a new post</a></h3>{% endif %}
+<div id="posts">
+{% for post in page %}
+    {% if not post.post %}
+    <div style="background-color:rgba(140, 140, 255, 0.2);">
+    {% include "blogs/post_card.html" %}
+    </div>
+    {% endif %}
+{% empty %}
+<div class="card mb-3">
+    <div class="card-body">
+        <p>We didn't find any posts here.</p>                                                        
+    </div>
+</div>
+{% endfor %}
+</div>
+<div id="next-page-zone">
+    {% if page.has_next %}
+        <a href="?page={{ page.next_page_number }}" up-defer="reveal" up-target="#posts:after, #next-page-zone">Loading more posts...</a>
+    {% else %}
+        <p class="end-message"></p>
+    {% endif %}
+</div>
+{% endblock content %}

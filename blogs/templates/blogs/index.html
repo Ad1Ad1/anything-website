@@ -1,0 +1,111 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<div class="container rounded" style="background-color: rgba(140, 140, 255, 0.15);">
+    <h1>
+        Make anything.
+    </h1>
+    <div>
+        <div>
+            <h3 class="fw-light">Here you can make a blog and share your experiences and thoughts with others. When you have new things to tell about, make a new post about it.</h3>
+        </div>
+        {% if maintextshow %}
+        <div class="pb-2 mb-2 border-bottom">
+            {% if user.is_authenticated %}
+            <h4>Welcome back, {{ user.username }}!</h4>
+            <h4>Make a new blog: <a class="btn btn-lg btn-secondary" href="{% url "blogs:new_blog" %}" role="button">Create a new blog</a></h4>
+            {% else %}
+            <h4>Join the community: <a class="btn btn-lg btn-primary" href="{% url "users:register" %}" role="button">Register</a></h4>
+            {% endif %}
+            {% if user.is_authenticated %}
+            <h4>Browse some new content today: <a class="btn btn-lg btn-secondary" href="{% url "blogs:topics" %}" role="button">Topics</a></h4>
+            {% else %}
+            <h4>Look at what we already have: <a class="btn btn-lg btn-secondary" href="{% url "blogs:topics" %}" role="button">Topics</a></h4>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if searchbarshow %}
+        <form action="{% url "blogs:index" %}" method='get' class="form">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button name="submit" class="btn btn-outline-primary">Search</button>
+        </form>
+
+        <div class="card mb-3 mt-3" style="background-color: rgba(140, 140, 255, 0.15);">
+            <div class="card-header">
+                <h4>Search results:</h4>
+            </div>
+            <div class="card-body">
+                {% for topic in searchresults %}
+                <div class="card mb-3" style="background-color: rgba(140, 140, 255, 0.15);">
+                    <h4 class="card-header">
+                        <a href="{% url "blogs:topic" topic.id %}" class="text-decoration-none">{{ topic.name }}</a> <small><a href="{% url "blogs:topic_top" topic.id %}" class="text-decoration-none fw-light">View Top posts</a></small> {% if topic.owner == user or user.is_superuser %}<small><a class="text-decoration-none fw-light" href="{% url "blogs:edit_topic" topic.id %}">edit topic</a></small>{% endif %}
+                    </h4>
+                    <div class="card-body">
+                        <h5>Created {{ topic.date|date:'M d, Y  H:i' }}</h5>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="card mb-3" style="background-color: rgba(140, 140, 255, 0.15);">
+                    <div class="card-body">
+                        <p>We didn't find any topics yet.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% if toptopicsshow %}
+        <div class="pb-2 mb-2 border-bottom">
+            {% for topic in toptopics %}
+            <div class="card mb-3">
+                <h4 class="card-header">
+                    <a href="{% url "blogs:topic" topic.id %}" class="text-decoration-none">{{ topic.name }}</a> <small><a href="{% url "blogs:topic_top" topic.id %}" class="text-decoration-none fw-light">View Top posts</a></small> {% if topic.owner == user or user.is_superuser %}<small><a class="text-decoration-none fw-light" href="{% url "blogs:edit_topic" topic.id %}">edit topic</a></small>{% endif %}
+                </h4>
+                <div class="card-body">
+                    <h5>Created {{ topic.date|date:'M d, Y  H:i' }}</h5>
+                </div>
+            </div>
+            {% empty %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p>We didn't find any topics yet.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if topicsshow %}
+        <div class="pb-2 mb-2 border-bottom" id="topics">
+            {% for topic in page %}
+            <div class="card mb-3" style="background-color:rgba(140, 140, 255, 0.2);">
+                <h4 class="card-header">
+                    <a href="{% url "blogs:topic" topic.id %}" class="text-decoration-none">{{ topic.name }}</a> <small><a href="{% url "blogs:topic_top" topic.id %}" class="text-decoration-none fw-light">View Top posts</a></small> {% if topic.owner == user or user.is_superuser %}<small><a class="text-decoration-none fw-light" href="{% url "blogs:edit_topic" topic.id %}">edit topic</a></small>{% endif %}
+                </h4>
+                <div class="card-body">
+                    <h5>Created {{ topic.date|date:'M d, Y  H:i' }}</h5>
+                </div>
+            </div>
+            {% empty %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p>We didn't find any topics yet.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="next-page-zone">
+            {% if page.has_next %}
+                <a href="?page={{ page.next_page_number }}" 
+                   up-defer="reveal" 
+                   up-target="#topics:after, #next-page-zone">
+                    Loading more topics...
+                </a>
+            {% else %}
+                <p class="end-message"></p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock page_header %}

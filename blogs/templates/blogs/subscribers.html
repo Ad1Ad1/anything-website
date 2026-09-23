@@ -1,0 +1,26 @@
+{% extends "blogs/base.html" %}
+{% block page_header %}
+{% if type == "topic" %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/<a class="text-decoration-none" href="{% url "blogs:topics" %}">Topics</a>/<a class="text-decoration-none" href="{% url "blogs:topic" object.id %}">{{ object }}</a>/Subscribers/</h4>
+<h3>Viewing subscribers of topic {{ object }}:</h3>
+{% elif type == "blog" %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Blogs/<a class="text-decoration-none" href="{% url "blogs:blog" object.id %}">{{ object }}</a>/Subscribers/</h4>
+<h3>Viewing subscribers of blog {{ object }}:</h3>
+{% endif %}
+{% endblock page_header %}
+{% block content %}
+<h4>Subscribers(sorted by time from subscribe):</h4>
+{% for subscriber in subscribers %}
+<div class="card mb-3" style="background-color: rgba(140, 140, 255, 0.15);">
+    <div class="card-body">
+        <h4>{{ subscriber.user.username }}</h4>
+    </div>
+</div>
+{% empty %}
+<div class="card mb-3" style="background-color: rgba(140, 140, 255, 0.15);">
+    <div class="card-body">
+        <p>We didn't find any subscribers here. Be the first to subscribe!</p>
+    </div>
+</div>
+{% endfor %}
+{% endblock content %}

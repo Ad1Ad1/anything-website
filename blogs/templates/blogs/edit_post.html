@@ -1,0 +1,92 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+{% if not post.news %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Blogs/<a class="text-decoration-none" href="{% url "blogs:blog" blog.id %}">{{ blog }}</a>/Posts/{{ post.name }}/edit/</h4>
+{% else %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/<a class="text-decoration-none" href="{% url "usd:view_usd_page" %}">Community</a>/News/{{ post.name }}/edit/</h4>
+{% endif %}
+{% if post.post %}
+<h3>Editing comment post {{ post.name }} of post {{ post.post.name }}</h3>
+{% else %}
+{% if post.news %}
+<h3>Editing news post {{ post.name }}</h3>
+{% else %}
+<h3>Editing post {{ post.name }} of blog {{ blog }}</h3>
+{% endif %}
+{% endif %}
+{% endblock page_header %}
+{% block content %}
+<form action="{% url "blogs:edit_post" post.id %}" method='post' up-layer="parent" enctype="multipart/form-data" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <div class="card p-4 mb-4 shadow-sm" style="background-color: rgba(140, 140, 255, 0.15);">
+        <h3>Media</h3>
+        {{ formset.management_form }}
+        {{ formset.non_form_errors }}
+
+        <div id="media-container">
+            {% for media_form in formset %}
+                <div class="media-form-row mb-3 border p-3 rounded bg-light" style="background-color: rgba(140, 140, 255, 0.15);">
+                    <div class="row">
+                        {{ media_form.id }}
+                        <div class="col-md-6">
+                            {% bootstrap_field media_form.name %}
+                        </div>
+                        <div class="col-md-6">
+                            {% bootstrap_field media_form.file_field %}
+                        </div>
+                    </div>
+                    {% if formset.can_delete %}
+                    <div class="mt-2 text-danger">
+                        {% bootstrap_field media_form.DELETE %}
+                    </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            </div>
+        <button type="button" id="add-media-btn" class="btn btn-primary mt-2">Add another mediafile</button>
+    </div>
+    <div id="media-empty-form" style="display: none;">
+        <div class="media-form-row mb-3 border p-3 rounded bg-light">
+            <div class="row">
+                {{ formset.empty_form.id }}
+                <div class="col-md-6">
+                    {% bootstrap_field formset.empty_form.name %}
+                </div>
+                <div class="col-md-6">
+                    {% bootstrap_field formset.empty_form.file_field %}
+                </div>
+            </div>
+            {% if formset.can_delete %}
+                <div class="mt-2 text-danger">
+                    {% bootstrap_field formset.empty_form.DELETE %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <button name="submit" class="btn btn-success">Save post</button>
+</form>
+<form method="POST" action="{% url "blogs:delete_post" post.id %}" class="form mt-3">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" name="delete_post">Delete this post</button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addBtn = document.querySelector("#add-media-btn");
+        const container = document.querySelector("#media-container");
+        const totalForms = document.querySelector("#id_media_set-TOTAL_FORMS");
+        const emptyFormTemplate = document.querySelector("#media-empty-form").innerHTML;
+
+        addBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            let currentFormCount = parseInt(totalForms.value);
+            const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, currentFormCount);
+            container.insertAdjacentHTML('beforeend', newFormHtml);
+            totalForms.value=parseInt(totalForms.value)+1
+        });
+    });
+</script>
+{% endblock content %}

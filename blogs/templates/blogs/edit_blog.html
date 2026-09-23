@@ -1,0 +1,60 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Blogs/<a class="text-decoration-none" href="{% url "blogs:blog" blog.id %}">{{ blog }}</a>/edit/<h4>
+<h3>Editing blog {{ blog }}:</h3>
+{% endblock page_header %}
+{% block content %}
+<form action="{% url "blogs:edit_blog" blog.id %}" method='post' class="form">
+    {% csrf_token %}
+    <div class="card p-4 mb-4" style="background-color: rgba(140, 140, 255, 0.15);">
+      <div class="card-body">
+        <h3>Main data</h3>
+        {% bootstrap_form form %}
+      </div>
+    </div>
+    <div class="card p-4 mb-4" style="background-color: rgba(140, 140, 255, 0.15);">
+      <div class="card-body">
+        <h3>Relations to topics</h3>
+        {{ formset.management_form }}
+        {{ formset.non_form_errors }}
+        <div id="form-container">
+            {% for formy in formset %}
+                <div class="topic-form mb-3 border p-3 rounded">
+                    {% bootstrap_form formy %}
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-form" class="btn btn-outline-primary mt-2">Add another relation</button>
+        <div id="empty-form" style="display: none;">
+          <div class="topic-form mb-3 border p-3 rounded" style="background-color: rgba(140, 140, 255, 0.15);">
+              {% bootstrap_form formset.empty_form %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <button name="submit" class="btn btn-success mt-4">Save blog</button>
+</form>
+<form method="POST" action="{% url "blogs:delete_blog" blog.id %}" class="form mt-3" up-layer="parent" style="background-color: rgba(140, 140, 255, 0.15);">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" name="delete_blog">Delete this blog</button>
+</form>
+<script>
+      const addFormBtn = document.querySelector("#add-form")
+      const totalNewForms = document.querySelector("#id_blogtopicrelation_set-TOTAL_FORMS")
+      const container = document.querySelector("#form-container")
+      const emptyFormHtml = document.querySelector("#empty-form").innerHTML
+
+      addFormBtn.addEventListener("click", function(e) {
+          e.preventDefault();
+          
+          const currentFormCount = document.querySelectorAll(".topic-form").length - 1
+          
+          const newFormHtml = emptyFormHtml.replace(/__prefix__/g, currentFormCount);
+          
+          container.insertAdjacentHTML('beforeend', newFormHtml);
+          
+          totalNewForms.setAttribute('value', currentFormCount + 1);
+      });
+</script>
+{% endblock content %}

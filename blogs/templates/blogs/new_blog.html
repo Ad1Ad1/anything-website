@@ -1,0 +1,59 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Blogs/new/</h4>
+<h3>Adding a blog</h3>
+{% endblock page_header %}
+{% block content %}
+<form action="{% url "blogs:new_blog" %}" method='post' class="form">
+    {% csrf_token %}
+    <div class="card p-4 mb-4" style="background-color: rgba(140, 140, 255, 0.15);">
+      <div class="card-body">
+        <h3>Main data</h3>
+        {% bootstrap_form form %}
+      </div>
+    </div>
+    <div class="card p-4 mb-4" style="background-color: rgba(140, 140, 255, 0.15);">
+      <div class="card-body">
+        <div class="card p-4 mb-4" style="background-color: rgba(140, 140, 255, 0.15);">
+          <h3>Relations to Topics</h3>
+          {{ formset.management_form }}
+          {{ formset.non_form_errors }}
+          
+          <div id="form-container">
+              {% for formy in formset %}
+                  <div class="topic-form mb-3 border p-3 rounded" style="background-color: rgba(140, 140, 255, 0.15);">
+                      {% bootstrap_form formy %}
+                  </div>
+              {% endfor %}
+          </div>
+          <button type="button" id="add-form" class="btn btn-outline-primary mt-2">Add another relation</button>
+          <div id="empty-form" style="display: none;">
+            <div class="topic-form mb-3 border p-3 rounded" style="background-color: rgba(140, 140, 255, 0.15);">
+                {% bootstrap_form formset.empty_form %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button name="submit" class="btn btn-success mt-4">Add blog</button>
+    <script>
+      const addFormBtn = document.querySelector("#add-form")
+      const totalNewForms = document.querySelector("#id_blogtopicrelation_set-TOTAL_FORMS")
+      const container = document.querySelector("#form-container")
+      const emptyFormHtml = document.querySelector("#empty-form").innerHTML
+
+      addFormBtn.addEventListener("click", function(e) {
+          e.preventDefault();
+          
+          const currentFormCount = document.querySelectorAll(".topic-form").length - 1
+          
+          const newFormHtml = emptyFormHtml.replace(/__prefix__/g, currentFormCount);
+          
+          container.insertAdjacentHTML('beforeend', newFormHtml);
+          
+          totalNewForms.setAttribute('value', currentFormCount + 1);
+      });
+  </script>
+</form>
+{% endblock content %}

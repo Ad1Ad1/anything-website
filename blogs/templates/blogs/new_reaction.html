@@ -1,0 +1,14 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Reactions/new/</h4>
+<h3>Adding a new reaction</h3>
+{% endblock page_header %}
+{% block content %}
+<form action="{% url "blogs:new_reaction" %}" enctype="multipart/form-data" method='post' up-layer="parent" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button name="submit" class="btn btn-success">Add reaction</button>
+    <input type="hidden" name="next" value="{{ next_url }}">
+</form>
+{% endblock content %}

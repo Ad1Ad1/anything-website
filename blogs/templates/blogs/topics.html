@@ -1,0 +1,34 @@
+
+{% extends "blogs/base.html" %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Topics/</h4>
+{% endblock page_header %}
+{% block content %}
+<h4>All topics:</h4>
+<div id="topics">
+{% for topic in page %}
+<div class="card mb-3" style="background-color:rgba(140, 140, 255, 0.2);">
+    <h4 class="card-header">
+        <a href="{% url "blogs:topic" topic.id %}" class="text-decoration-none">{{ topic.name }}</a> <small><a href="{% url "blogs:topic_top" topic.id %}" class="text-decoration-none fw-light">View Top posts</a></small> {% if topic.owner == user or user.is_superuser %}<small><a class="text-decoration-none fw-light" href="{% url "blogs:edit_topic" topic.id %}">edit topic</a></small>{% endif %}
+    </h4>
+    <div class="card-body">
+        <h5>Created {{ topic.date|date:'M d, Y  H:i' }}</h5>
+    </div>
+</div>
+{% empty %}
+<div class="card mb-3">
+    <div class="card-body">
+        <p>We didn't find any topics yet.</p>
+    </div>
+</div>
+{% endfor %}
+</div>
+<div id="next-page-zone">
+    {% if page.has_next %}
+        <a href="?page={{ page.next_page_number }}" up-defer="reveal" up-target="#topics:after, #next-page-zone">Loading more topics...</a>
+    {% else %}
+        <p class="end-message"></p>
+    {% endif %}
+</div>
+<h3><a class="text-decoration-none" style="color:green;" href="{% url "blogs:new_topic" %}">Add a new topic</a>
+{% endblock content %}

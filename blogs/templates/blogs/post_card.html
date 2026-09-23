@@ -1,0 +1,206 @@
+{% load django_bootstrap5 %}
+{% load static %}
+{% if post.hidden and post.owner != user %}
+{% else %}
+{% if post.hidden %}
+<div class="card mb-3" style="background-color: rgba(170, 170, 170, 0.35);">
+{% else %}
+<div class="card mb-3"  style="background-color: rgba(140, 140, 255, 0.15);">
+{% endif %}
+    {% if post.hidden %}
+    <h4 class="card-header" style="background-color: rgba(170, 170, 255, 0.35);">
+    {% else %}
+    <h4 class="card-header">
+    {% endif %}
+        {% if post.owner.profile.pic %}
+            <img src="{{ post.owner.profile.pic.url }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+        {% else %}
+            <img src="{% static 'default_picture.jpg' %}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+        {% endif %}
+        {% if post.owner.username == "Administration_notice_account" and not post.news %}
+        <strong style="color: red;">[OFFICIAL NOTICE]</strong>
+        {% endif %}
+        {{ post.name }}({{ post.date|date:'M d, Y  H:i' }}) by <a class="text-decoration-none" href="{% url "users:profile" post.owner 'infobio' %}">{{ post.owner }} </a>
+        {% if pagetype == "top" %}
+        Post from blog {{ post.blog }}
+        {% endif %}
+        {% if not post.news %}
+        {% if post.owner == user or user.is_superuser %}<small><a class="text-decoration-none fw-light" href="{% url "blogs:edit_post" post.id %}" up-layer="new">edit post</a></small>{% endif %}
+        {% else %}
+        {% if profile.is_admin %}<small><a class="text-decoration-none fw-light" href="{% url "blogs:edit_post" post.id %}">edit post</a></small>{% endif %}
+        {% endif %}
+    </h4>
+    {% if post.hidden %}
+    <div class="card-body" style="background-color: rgba(170, 170, 255, 0.35);">
+    {% else %}
+    <div class="card-body">
+    {% endif %}
+        <h5 class="fw-light">{{ post.text|linebreaks }}</h5>
+        <div class="row align-items-start g-3 mt-3">
+            {% for media,type in post.medias.items %}
+                {% if type == "img" %}
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ media.file_field.url }}" target="_blank"><img id="dynamicImage" src="{{ media.file_field.url }}" class="rounded" alt="Файл завантажується..." style="aspect-ratio: 4/3; max-width:100%; display:cover;"></img>
+                 </a></div>
+                {% elif type == "vid" %}
+                    <div class="col-md-3 mb-3">
+                        <div style="aspect-ratio: 4 / 3; overflow: hidden;">
+                            <video src="{{ media.file_field.url }}" class="rounded"
+                                   style="width: 100%; height: 100%; object-fit: cover;"
+                                   controls></video>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div>
+            {% for media, type in post.medias.items %}
+            {% if type == "snd" %}
+                <audio class="col-md-3 mb-3" src="{{ media.file_field.url }}" controls>Browser was not able to support this sound</audio>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <div>
+            {% for media,type in post.medias.items %}
+            {% if type == "dfl" %}
+                <a href="{{ media.download_url }}"
+                data-name="{{ media.name }}"
+                data-file="{{ media.file_field.name }}"
+                class="my-download-btn btn btn-outline-secondary btn-sm mb-3 w-auto">
+                Завантажити файл {{ media.name }}
+                </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <div class="d-inline-flex align-items-center flex-wrap gap-2 rounded" style="padding:5px; border: 1px solid;">
+            {% if post.subords %}
+                <button class="btn p-0 border-0 shadow-none btn-sm"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#replies-{{ post.id }}"
+                        style="color: blue;">
+                    <i class="bi bi-chat-left-text me-1"></i> {{ post.subords|length }}
+                </button>
+            {% endif %}
+            {% if not post.news %}
+                <a href="{% url 'blogs:new_post' 0 post.id post.news %}" up-layer="new" style="color: gray;"><i class="bi bi-plus-circle-fill fs-5"></i></a>
+            <div class="vr mx-1"></div>
+            {% endif %}
+            <group id="rating" class="d-inline-flex align-items-center flex-wrap gap-2">
+                <form action="{% url 'blogs:vote' post.id 'True' %}" method="post" class="p-0 m-0" up-submit up-target="#rating">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link p-0 border-0 text-success">
+                        {% if post.user_vote == True %}
+                            <i class="bi bi-caret-up-fill fs-3"></i>
+                        {% else %}
+                            <i class="bi bi-caret-up fs-3"></i>
+                        {% endif %}
+                    </button>
+                </form>
+                <span class="fw-bold my-1">
+                    {% if post.rating > 0 %}
+                        <span class="text-success">{{ post.rating }}</span>
+                    {% elif post.rating < 0 %}
+                        <span class="text-danger">{{ post.rating }}</span>
+                    {% else %}
+                        <span class="text-muted">{{ post.rating }}</span>
+                    {% endif %}
+                </span>
+                <form action="{% url 'blogs:vote' post.id 'False' %}" method="post" class="p-0 m-0" up-submit up-target="#rating">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link p-0 border-0 text-danger">
+                        {% if post.user_vote == False %}
+                            <i class="bi bi-caret-down-fill fs-3"></i>
+                        {% else %}
+                            <i class="bi bi-caret-down fs-3"></i>
+                        {% endif %}
+                    </button>
+                </form>
+            </group>
+            <div class="d-flex gap-2" id="react">
+                {% for reaction, count in post.reactions.items %}
+                {% if reaction in post.user_reactions %}
+                    <form action="{% url 'blogs:react' post.id reaction.id %}" method="post" up-submit up-target="#react">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item d-flex align-middle mb-0 align-items-center">
+                            <div style="background-color: lightblue; padding:5px" class="d-flex gap-2 rounded">
+                                {% if reaction.plain %}
+                                    <span class="mb-0 align-middle">{{ reaction.plain }}</span>
+                                {% else %}
+                                    <img src="{{ reaction.image.url }}" style="width: 24px; height: 24px; object-fit: contain;">
+                                {% endif %}
+                                <p class="mb-0">{{ count }}</p>
+                            </div>
+                        </button>
+                    </form>
+                {% else %}
+                    <form action="{% url 'blogs:react' post.id reaction.id %}" up-submit up-target="#react" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item d-flex align-middle mb-0 align-items-center">
+                            <div style="background-color: lightgray; padding:5px" class="d-flex gap-2 rounded">
+                                {% if reaction.plain %}
+                                    <span class="mb-0 align-middle">{{ reaction.plain }}</span>
+                                {% else %}
+                                    <img src="{{ reaction.image.url }}" style="width: 24px; height: 24px; object-fit: contain;">
+                                {% endif %}
+                                <p class="mb-0">{{ count }}</p>
+                            </div>
+                        </button>
+                    </form>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle shadow-none"
+                        type="button"
+                        id="reactionMenu{{ post.id }}"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+
+                <ul class="dropdown-menu shadow" aria-labelledby="reactionMenu{{ post.id }}">
+                    {% for type in reactions %}
+                        <li class="d-flex align-items-center">
+                            <form action="{% url 'blogs:react' post.id type.id %}" method="post" up-submit up-target="#react">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item d-flex align-middle mb-0 align-items-center">
+                                    <div class="d-inline-flex justify-content-center" style="width: 40px;">
+                                        {% if type.plain %}
+                                            <span class="fs-4 me-2">{{ type.plain }}</span>
+                                        {% else %}
+                                            <div class="container d-flex justify-content-center" style="width: 32;">
+                                                <img src="{{ type.image.url }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </button>
+                            </form>
+                            {% if type.owner == user %}
+                            <a href="{% url 'blogs:edit_reaction' type.id %}" up-layer="new" class="mb-0 fw-light text-decoration-none">edit</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-primary" href="{% url 'blogs:new_reaction' %}" up-layer="new">
+                            <i class="bi bi-cloud-upload me-1"></i> Upload new reaction
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% if post.subords %}
+    <div class="collapse" id="replies-{{ post.id }}">
+        <div class="ms-4 border-start ps-3 mt-3">
+            {% for sub_post in post.subords %}
+                {% with post=sub_post pagetype="none" %}
+                    {% include "blogs/post_card.html" %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+{% endif %}

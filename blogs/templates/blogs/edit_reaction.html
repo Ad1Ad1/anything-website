@@ -1,0 +1,19 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Reactions/{{ reaction.id }}/edit/</h4>
+<h3>Editing a reaction</h3>
+{% endblock page_header %}
+{% block content %}
+<form action="{% url "blogs:edit_reaction" reaction.id %}" enctype="multipart/form-data" method='post' up-layer="parent" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button name="submit" class="btn btn-success">Save reaction</button>
+    <input type="hidden" name="next" value="{{ next_url }}">
+</form>
+<form method="POST" action="{% url "blogs:delete_reaction" reaction.id %}" up-layer="parent" class="form mt-3">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" name="delete_reaction">Delete this reaction</button>
+    <input type="hidden" name="next" value="{{ next_url }}">
+</form>
+{% endblock content %}

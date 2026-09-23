@@ -1,0 +1,21 @@
+{% extends "blogs/base.html" %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Top/</h4>
+<h3>Top 20 Posts for You</h3>
+{% endblock page_header %}
+{% block content %}
+<h4>Posts(sorted by relevance):</h4>
+{% for post in posts %}
+    {% if not post.post %}
+    {% with blog=post.blog %}
+    {% include "blogs/post_card.html" %}
+    {% endwith %}
+    {% endif %}
+{% empty %}
+<div class="card mb-3">
+    <div class="card-body">
+        <p>We didn't find any posts here. Subscribe to a topic or a blog to start recieving recommendations!</p>                                              
+    </div>
+</div>
+{% endfor %}
+{% endblock content %}
