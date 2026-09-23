@@ -1,0 +1,15 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Auth/Register/</h4>
+{% endblock page_header %}
+{% block content %}
+<form method="post" action="{% url "users:register" %}" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <p>By presing Register you agree to our
+    <a href="{% url "users:personal" %}">Terms and Conditions, Privacy Policy and Cookie Storage</a></p>
+    <button name="submit" class="btn btn-primary">Register</button>
+    <input type="hidden" name="next" value="{% url "users:new_profile" %}" />
+</form>
+{% endblock content %}

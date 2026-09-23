@@ -1,0 +1,42 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/<a class="text-decoration-none" href="{% url "usd:view_usd_page" %}">Community</a>/Membership Moderation/</h4>
+<h3>Requests for Community Membership</h3>
+{% endblock page_header %}
+{% block content %}
+{% for req in unprocessed %}
+<div class="card mt-3" style="background-color: rgba(140, 140, 255, 0.15);">
+    <div class="card-body">
+        <h5>User {{ req.user }}, from {{ req.q0answer }} is requesting official Community Membership</h5>
+        <h5>He aims to do in community {{ req.q2answer }}</h5>
+        <h5>Here is how he describes himself: {{ req.q1answer }}</h5>
+        <a class="btn btn-outline-success" href="{% url "usd:accept_citizenship_request" req.pk %}">Accept</a>
+        <a class="btn btn-outline-danger" href="{% url "usd:reject_citizenship_request" req.pk %}">Reject</a>
+    </div>
+</div>
+{% endfor %}
+{% for req in processed %}
+{% if req.state == "A" %}
+<div class="card border-success mt-3" style="background-color: rgba(140, 140, 255, 0.15);">
+    <div class="card-body">
+        <h5 class="card-title">ACCEPTED this request</h5>
+        <h5>User {{ req.user }}, from {{ req.q0answer }} is requesting official Community Membership</h5>
+        <h5>He aims to do in community {{ req.q2answer }}</h5>
+        <h5>Here is how he describes himself: {{ req.q1answer }}</h5>
+        <a class="btn btn-outline-secondary" href="{% url "usd:revert_citizenship_request_action" req.pk %}">Revert acception</a>
+    </div>
+</div>
+{% elif req.state == "R" %}
+<div class="card border-danger mt-3" style="background-color: rgba(140, 140, 255, 0.15);">
+    <div class="card-body">
+        <h5 class="card-title">REJECTED this request due to {{ req.due_to }}</h5>
+        <h5>User {{ req.user }}, from {{ req.q0answer }} is requesting official Community Membership</h5>
+        <h5>He aims to do in community {{ req.q2answer }}</h5>
+        <h5>Here is how he describes himself: {{ req.q1answer }}</h5>
+        <a class="btn btn-outline-secondary" href="{% url "usd:revert_citizenship_request_action" req.pk %}">Revert rejection</a>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock content %}

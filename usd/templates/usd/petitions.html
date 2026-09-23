@@ -1,0 +1,60 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/<a class="text-decoration-none" href="{% url "usd:view_usd_page" %}">Community</a>/Idea Requests/</h4>
+<h3>Idea Requests</h3>
+{% endblock page_header %}
+{% block content %}
+<h3><a class="fw-light text-decoration-none" href="{% url 'usd:new_petition' %}">New Idea Request</a></h3>
+{% for petition in petitions %}
+<div class="card mb-3" style="background-color: rgba(140, 140, 255, 0.15);">
+    <h4 class="card-header">
+        {% if petition.owner.profile.pic %}
+            <img src="{{ petition.owner.profile.pic.url }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+        {% else %}
+            <img src="{% static "default_picture.jpg" %}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+        {% endif %}
+        - {{ petition.date|date:'M d, Y  H:i' }} by <a class="text-decoration-none" href="{% url "users:profile" petition.owner 'infobio' %}">{{ petition.owner }} </a>
+    </h4>
+    </h4>
+    <div class="card-body">
+        <h5 class="fw-light">{{ petition.text }}</h5>
+        <div class="d-inline-flex align-items-center flex-wrap gap-2 rounded" style="padding:5px; border: 1px solid;">
+            <form action="{% url 'usd:vote' petition.id 'True' %}" method="post" class="p-0 m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link p-0 border-0 text-success">
+                    {% if petition.user_vote == True %}
+                        <i class="bi bi-caret-up-fill fs-3"></i>
+                    {% else %}
+                        <i class="bi bi-caret-up fs-3"></i>
+                    {% endif %}
+                </button>
+            </form>
+            <span class="fw-bold my-1">
+                {% if petition.rating > 0 %}
+                    <span class="text-success">{{ petition.rating }}</span>
+                {% elif petition.rating < 0 %}
+                    <span class="text-danger">{{ petition.rating }}</span>
+                {% else %}
+                    <span class="text-muted">{{ petition.rating }}</span>
+                {% endif %}
+            </span>
+            <form action="{% url 'usd:vote' petition.id 'False' %}" method="post" class="p-0 m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link p-0 border-0 text-danger">
+                    {% if petition.user_vote == False %}
+                        <i class="bi bi-caret-down-fill fs-3"></i>
+                    {% else %}
+                        <i class="bi bi-caret-down fs-3"></i>
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+        {% if profile.is_admin %}
+        <h3 style="color:red;" class="fw-light">Moderator: <a href="{% url "usd:delete_petition" petition.id %}" class="text-decoration-none fw-light">Delete this idea request</a></h3>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock content %}

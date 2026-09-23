@@ -1,0 +1,53 @@
+{% extends "blogs/base.html" %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Community/</h4>
+{% endblock page_header %}
+{% block content %}
+<h2>Anything Website Community</h2>
+<h3 class="fw-light">This is an online community of the website available to trusted users, with news and expansion aim.</h3>
+{% if requesty %}
+{% if state == "R" %}
+<h3>Fill a request to apply for membership: <a href="{% url "usd:new_request_citizenship" %}" class="text-decoration-none">Fill</a></h3>
+{% endif %}
+{% else %}
+<h3>Fill a request to apply for memnership: <a href="{% url "usd:new_request_citizenship" %}" class="text-decoration-none">Fill</a></h3>
+{% endif %}
+{% if requesty %}
+{% if state == "A" %}
+<div class="card border-success mt-3" style="background-color: rgba(140, 140, 255, 0.15);">
+	<div class="card-body">
+		<h5 class="card-title">You are a member of Anything Website Community.</h5>
+	</div>
+</div>
+{% elif state == "R" %}
+<div class="card border-danger mt-3" style="background-color: rgba(140, 140, 255, 0.15);">
+	<div class="card-body">
+		<h5>Your request was rejected by our moderation team due to {{ requesty.due_to }}</h5>
+		<h5>Send a new request if you want.</h5>
+	</div>
+</div>
+{% else %}
+<div class="card mt-3" style="background-color: rgba(140, 140, 255, 0.15);">
+	<div class="card-body">
+		<h5>Our moderation team is processing your request. Please wait...</h5>
+	</div>
+</div>
+{% endif %}
+{% endif %}
+{% if profile.is_admin %}
+<h3 style="color:red;" class="fw-light">Moderator: <a href="{% url "usd:view_moderator_ucr" %}" class="text-decoration-none">View as moderator</a></h3>
+{% endif %}
+{% if profile.is_citizen %}
+<h3 class="fw-light">View Idea Requests: <a href="{% url "usd:petitions" %}" class="text-decoration-none">View</a></h3>
+<h3>News</h3>
+<h4 class="fw-light">Top 5</h4>
+{% for post in news %}
+    {% include "blogs/post_card.html" %}
+{% empty %}
+{% endfor %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "usd:news" %}">View all news</a>
+{% endif %}
+{% if profile.is_admin %}
+<h3 style="color:red;" class="fw-light">Moderator: <a href="{% url "blogs:new_post" 0 0 "True" %}" class="text-decoration-none">Add a new news post</a></h3>
+{% endif %}
+{% endblock content %}

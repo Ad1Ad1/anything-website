@@ -1,0 +1,10 @@
+{% extends "blogs/base.html" %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/<a class="text-decoration-none" href="{% url "usd:view_usd_page" %}">Community</a>/News/</h4>
+{% endblock page_header %}
+{% block content %}
+{% for post in news %}
+    {% include "blogs/post_card.html" %}
+{% empty %}
+{% endfor %}
+{% endblock content %}

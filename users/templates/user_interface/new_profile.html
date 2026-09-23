@@ -1,0 +1,12 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<h2>Complete your profile...</h2>
+{% endblock page_header %}
+{% block content %}
+<form action="{% url "users:new_profile" %}" method='post' class="form" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button name="submit" class="btn btn-success">Continue to site</button>
+</form>
+{% endblock content %}  

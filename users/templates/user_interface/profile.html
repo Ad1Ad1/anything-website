@@ -1,0 +1,228 @@
+{% extends "blogs/base.html" %}
+{% load static %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Users/{{ profile.username }}</h4>
+{% endblock page_header %}
+{% block content %}
+<div class="nav nav-tabs">
+	<div class="nav-item">
+		{% if type == 'infobio' %}
+			<a class="nav-link active" style="background-color: rgba(140, 140, 255, 0.55);" href="{% url "users:profile" profile.username 'infobio' %}">Info/Bio</a>
+		{% else %}
+			<a class="nav-link" style="background-color: rgba(140, 140, 255, 0.35);" href="{% url "users:profile" profile.username 'infobio' %}">Info/Bio</a>
+		{% endif %}
+	</div>
+	{% if profile_.private == False or user == profile %}
+	<div class="nav-item">
+		{% if type == 'activity' %}
+			<a class="nav-link active" style="background-color: rgba(140, 140, 255, 0.55);" href="{% url "users:profile" profile.username 'activity' %}">Activity</a>
+		{% else %}
+			<a class="nav-link" style="background-color: rgba(140, 140, 255, 0.35);" href="{% url "users:profile" profile.username 'activity' %}">Activity</a>
+		{% endif %}
+	</div>
+	<div class="nav-item">
+		{% if type == 'following' %}
+			<a class="nav-link active" style="background-color: rgba(140, 140, 255, 0.55);" href="{% url "users:profile" profile.username 'following' %}">Following</a>
+		{% else %}
+			<a class="nav-link" style="background-color: rgba(140, 140, 255, 0.35);" href="{% url "users:profile" profile.username 'following' %}">Following</a>
+		{% endif %}
+	</div>
+	{% endif %}
+	{% if user == profile %}
+	<div class="nav-item">
+		{% if type == 'settings' %}
+			<a class="nav-link active" style="background-color: rgba(255, 205, 0, 0.55);" href="{% url "users:profile" profile.username 'settings' %}">Settings</a>
+		{% else %}
+			<a class="nav-link" style="background-color: rgba(255, 205, 0, 0.35);" href="{% url "users:profile" profile.username 'settings' %}">Settings</a>
+		{% endif %}
+	</div>
+	{% endif %}
+	{% if user.profile.is_admin %}
+	<div class="nav-item">
+		{% if type == 'admin' %}
+			<a class="nav-link active" style="background-color: rgba(255, 145, 0, 0.55);" href="{% url "users:profile" profile.username 'admin' %}" style="color:orange">Administration</a>
+		{% else %}
+			<a class="nav-link" style="background-color: rgba(255, 145, 0, 0.35);" href="{% url "users:profile" profile.username 'admin' %}" style="color:orange">Administration</a>
+		{% endif %}
+	</div>
+	{% endif %}
+</div>
+{% if type == 'activity' %}
+{% if profile_.private == False or user == profile %}
+{% for content in contents %}
+<div class="card mt-3" style="background-color: rgba(140, 140, 255, 0.05);">
+    <div class="card-header">
+    	{% if content.action_obj == "P" %}
+        <strong>{{ content.get_action_type_display }} post {{content.name}} - <small>{{content.timestamp}}</small></strong>
+        {% elif content.action_obj == "B" %}
+        <strong>{{ content.get_action_type_display }} blog {{content.name}} - <small>{{content.timestamp}}</small></strong>
+        {% elif content.action_obj == "T" %}
+        <strong>{{ content.get_action_type_display }} topic {{content.name}} - <small>{{content.timestamp}}</small></strong>
+        {% elif content.action_obj == "U" %}
+        <strong>{{ content.get_action_type_display }} Membership Request - <small>{{content.timestamp}}</small></strong>
+        {% elif content.action_obj == "E" %}
+        <strong>{{ content.get_action_type_display }} Idea Request {{content.text}} - <small>{{content.timestamp}}</small></strong>
+        {% elif content.action_obj == "S" %}
+        <strong>{{ content.get_action_type_display }} style {{content.name}} - <small>{{content.timestamp}}</small></strong>
+    	{% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+{% elif type == 'following' %}
+{% if profile_.private == False or user == profile %}
+<h5 class="mt-2"><strong>Following total {{ fb }} blogs and {{ ft }} topics</strong></h5>
+{% for subscription in following %}
+{% if subscription.TYPE == 'blog' %}
+<div class="card mt-3" style="background-color: rgba(140, 140, 255, 0.05);">
+    <div class="card-header">
+    	Following blog <a href="{% url "blogs:blog" subscription.blog.pk %}">{{ subscription.blog.name }}</a>
+    </div>
+</div>
+{% else %}
+<div class="card mt-3" style="background-color: rgba(140, 140, 255, 0.05);">
+    <div class="card-header">
+    	Following topic <a href="{% url "blogs:topic" subscription.topic.pk %}">{{ subscription.topic.name }}</a>
+    </div>
+</div>
+{% endif %}
+{% empty %}
+<div class="card mt-3" style="background-color: rgba(140, 140, 255, 0.05);">
+    <div class="card-header">
+    	This user isn't following anything yet!
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+{% elif type == 'infobio' %}
+<div class="card mt-3" style="background-color: rgba(140, 140, 255, 0.05);">
+    <div class="card-header">
+    	<h4>User {{ profile }} {% if profile == user %}<a class="fw-light text-decoration-none" href="{% url "users:edit_profile" %}">edit</a>{% endif %}</h4>
+    </div>
+    {% if profile_.bio == "" %}
+    <h5>This user doesn't have a bio yet!</h5>
+    {% else %}
+    <div class="card-body">
+    	<div class="d-inline-flex rounded">
+    		{% if profile_.pic %}
+    		<img src="{{ profile_.pic.url }}" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+			{% else %}
+    		<img src="{% static "default_picture.jpg" %}" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+			{% endif %}
+    		<h5 style="padding-left: 5px; padding-right: 5px;">
+    		Member since {{ profile_.time_created|date:'M d, Y' }},
+    		<br>
+    		{% if profile_.birthplace %}
+    		Born in {{ profile_.birthplace }},
+    		{% endif %}
+    		{% if profile_.location %}
+    		{{ profile }} lives in {{ profile_.location }}.
+    		{% endif %}
+    		<br><br>
+    		Bio:
+    		{{ profile_.bio|linebreaks }}
+    		<br>
+    		Made a total of {{ totpos }} posts and comments.
+    		Has {{ rating }} total reputation
+    		</h5>
+    	</div>
+    </div>
+    {% endif %}
+</div>
+{% elif type == "settings" %}
+<div class="card mt-3" style="background-color: rgba(255, 100, 0, 0.35);">
+    <div class="card-body">
+        <a class="btn btn-danger" href="{% url "users:delete_user" %}">Delete Account</a>
+    </div>
+</div>
+<div class="card mt-3" style="background-color: rgba(170, 170, 255, 0.35);">
+    <h4 class="card-header">Styling</h4>
+    <div class="card-body" >
+        {% for style in styles %}
+        <div class="card mb-3">
+            <h4 class="card-header" style="background-color: rgba(255, 185, 0, 0.55);">
+                <p>{{ style.name }}</p> {% if style.user == user or user.is_superuser %}<small><a class="text-decoration-none fw-light" href="{% url "users:edit_style" style.id %}">edit style</a></small>{% endif %}
+            </h4>
+            <div class="card-body" style="background-color: rgba(255, 185, 0, 0.35);">
+                <h5>Created {{ style.time_created|date:'M d, Y  H:i' }}</h5>
+                <small class="fw-light">
+                    {% if style.searchbar %}
+                    <h5>Show searchbar</h5>
+                    {% else %}
+                    <h5>Hide searchbar</h5>
+                    {% endif %}
+                    {% if style.topics %}
+                    <h5>Show topics</h5>
+                    {% else %}
+                    <h5>Hide topics</h5>
+                    {% endif %}
+                    {% if style.toptopics %}
+                    <h5>Show top topics</h5>
+                    {% else %}
+                    <h5>Hide top topics</h5>
+                    {% endif %}
+                    {% if style.maintext %}
+                    <h5>Show general text</h5>
+                    {% else %}
+                    <h5>Hide general text</h5>
+                    {% endif %}
+                </small>
+                {% if style == profile_.style %}
+                <h4>Current style</h4>
+                {% else %}
+                <form method="POST" action="{% url "users:select_style" style.id %}" class="form mt-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success" name="select_style">Select</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="card mb-3">
+            <div class="card-body" style="background-color: rgba(255, 185, 0, 0.35);">
+                <p>We didn't find any styles of yours yet.</p>
+            </div>
+        </div>
+        {% endfor %}
+        <h3><a class="text-decoration-none" style="color:orange;" href="{% url "users:new_style" %}">Make a new style</a></h3>
+    </div>
+</div>
+{% elif type == 'admin' %}
+<div class="card mt-3" style="background-color: rgba(255, 205, 0, 0.35);">
+    <div class="card-header">
+        <h4>User statistics</h4>
+    </div>
+    <div class="card-body">
+        <h4>This user has a profile.</h4>
+        {% if profile_.is_admin %}
+        <h4>This user is a fellow admin!</h4>
+        {% endif %}
+        {% if profile_.is_citizen %}
+        <h4>This user is a Community Member!</h4>
+        {% endif %}
+        {% if profile_.is_banned %}
+        <h4>This user is banned.</h4>
+        {% endif %}
+    </div>
+</div>
+<div class="card mt-3" style="background-color: rgba(255, 105, 0, 0.35);">
+    <div class="card-header">
+        <h4>User actions</h4>
+    </div>
+    <div class="card-body">
+        {% if not profile_.is_banned %}
+        <a class="btn btn-warning" href="{% url "users:ban_user" profile.username "True" %}">Ban this user</a>
+        {% else %}
+        <a class="btn btn-warning" href="{% url "users:ban_user" profile.username "False" %}">Unban this user</a>
+        {% endif %}
+        {% if user.is_superuser %}
+        {% if not profile_.is_admin %}
+        <a class="btn btn-success" href="{% url "users:promote_user" profile.username %}">Promote this user to admin</a>
+        {% else %}
+        <a class="btn btn-danger" href="{% url "users:demote_user" profile.username %}">Demote this user</a>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock content %}
