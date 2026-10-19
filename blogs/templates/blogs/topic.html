@@ -1,0 +1,58 @@
+{% extends "blogs/base.html" %}
+{% block page_header %}
+<div>
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/<a class="text-decoration-none" href="{% url "blogs:topics" %}">Topics</a>/{{ topic }}/</h4>
+<h3>Topic: {{ topic }} {% if topic.owner == user or user.is_superuser %}<a class="fw-light text-decoration-none" href="{% url "blogs:edit_topic" topic.id %}">edit</a>{% endif %}</h3>
+</div>
+{% if topic.owner != user %}
+<div class="d-inline-flex align-items-center flex-wrap gap-2 rounded">
+    {% if not topic.user_subscribed %}
+    <form method="POST" action="{% url "blogs:subscribe" "topic" topic.id "True" %}" class="form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-secondary" name="subscribe">Subscribe</button>
+    </form>
+    {% else %}
+    <h4 class="mb-0">Subscribed</h4>
+    <form method="POST" action="{% url "blogs:subscribe" "topic" topic.id "True" %}" class="form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-secondary" name="subscribe">Unsubscribe</button>
+    </form>
+    {% endif %}
+</div>
+{% endif %}
+<div>
+<a href="{% url "blogs:topic_top" topic.id %}" class="text-decoration-none">View Top posts</a>
+</div>
+<a href="{% url "blogs:subscribers" "topic" topic.id %}" class="text-decoration-none">View subscribers</a>
+{% endblock page_header %}
+{% block content %}
+<h4>Blogs(sorted by relevance):</h4>
+<div id="blogs">
+{% for blog in page %}
+<div class="card mb-3" style="background-color:rgba(140, 140, 255, 0.2);">
+    <h4 class="card-header">
+        <a href="{% url "blogs:blog" blog.blog.id %}" class="text-decoration-none">{{ blog.blog.name }}</a>
+        {% if blog.blog.owner == user or user.is_superuser %}<small><a class="text-decoration-none fw-light" href="{% url "blogs:edit_blog" blog.blog.id %}">edit blog</a></small>{% endif %}
+    </h4>
+    <div class="card-body">
+        <h5>Relevance: {{ blog.percentage }}%</h5>
+
+        <h5>Created {{ blog.blog.date|date:'M d, Y  H:i' }}</h5>
+    </div>
+</div>
+{% empty %}
+<div class="card mb-3">
+    <div class="card-body">
+        <p>We didn't find any blogs related to this topic. Be the first to create one</p>
+    </div>
+</div>
+{% endfor %}
+</div>
+<div id="next-page-zone">
+    {% if page.has_next %}
+        <a href="?page={{ page.next_page_number }}" up-defer="reveal" up-target="#blogs:after, #next-page-zone">Loading more blogs...</a>
+    {% else %}
+        <p class="end-message"></p>
+    {% endif %}
+</div>
+{% endblock content %}

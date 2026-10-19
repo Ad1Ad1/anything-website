@@ -1,0 +1,13 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/<a class="text-decoration-none" href="{% url "blogs:topics" %}">Topics</a>/new/</h4>
+<h3>Adding a new topic</h3>
+{% endblock page_header %}
+{% block content %}
+<form action="{% url "blogs:new_topic" %}" method='post' class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button name="submit" class="btn btn-success">Save topic</button>
+</form>
+{% endblock content %}

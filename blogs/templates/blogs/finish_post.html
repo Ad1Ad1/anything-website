@@ -1,0 +1,31 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/Blogs/<a class="text-decoration-none" href="{% url "blogs:blog" post.blog.id %}">{{ post.blog }}</a>/Posts/{{ post.name }}/Post Finish/<h4>
+<h3>Viewing post finish of post {{ post.name }}:</h3>
+{% endblock page_header %}
+{% block content %}
+<div class="card mb-3" style="background-color: rgba(140, 140, 255, 0.15);">
+  <div class="card-header">
+    <h4>Tags</h4>
+  </div>
+  <div class="card-body">
+    {% for tag in tags %}
+    <div class="row align-items-center">
+      <div class="col">
+        <h4 class="fw-light">{{ tag.tag.name }}</h4>
+      </div>
+      <div class="col-auto mb-3">
+        <form method="POST" action="{% url "blogs:delete_tag" post.id tag.id %}" class="form mt-3">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger" name="delete_tag">Delete</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<h3 class="fw-light text-decoration-none"><a href="{% url "blogs:search_tags" post.id %}">Add a new tag</a></h3>
+<a class="btn btn-success mt-3 mb-3" href="{% url "blogs:blog" post.blog.id %}">Save post</a>
+{% endblock content %}

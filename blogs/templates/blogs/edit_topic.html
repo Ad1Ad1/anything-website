@@ -1,0 +1,17 @@
+{% extends "blogs/base.html" %}
+{% load django_bootstrap5 %}
+{% block page_header %}
+<h4 class="fw-light"><a class="text-decoration-none" href="{% url "blogs:index" %}">Site</a>/<a class="text-decoration-none" href="{% url "blogs:topics" %}">Topics</a>/<a class="text-decoration-none" href="{% url "blogs:topic" topic.id %}">{{ topic }}</a>/edit/</h4>
+<h3>Editing topic {{ topic }}</h3>
+{% endblock page_header %}
+{% block content %}
+<form action="{% url "blogs:edit_topic" topic.id %}" method='post' class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button name="submit" class="btn btn-success">Save topic</button>
+</form>
+<form method="POST" action="{% url "blogs:delete_topic" topic.id %}" class="form mt-3">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" name="delete_topic">Delete this topic</button>
+</form>
+{% endblock content %}
